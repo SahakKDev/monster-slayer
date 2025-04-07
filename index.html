@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <!-- Vue CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="app.js" defer></script>
     <title>Monster Slayer</title>
   </head>
@@ -16,24 +16,49 @@
       <section id="monster" class="container">
         <h2>Monster Health</h2>
         <div class="healthbar">
-          <div class="healthbar__value"></div>
+          <div class="healthbar__value" :style="monsterBarStyles"></div>
         </div>
       </section>
       <section id="player" class="container">
         <h2>Your Health</h2>
         <div class="healthbar">
-          <div class="healthbar__value"></div>
+          <div class="healthbar__value" :style="playerBarStyles"></div>
         </div>
       </section>
-      <section id="controls">
-        <button>ATTACK</button>
-        <button>SPECIAL ATTACK</button>
-        <button>HEAL</button>
-        <button>SURRENDER</button>
+      <section class="container" v-if="winner">
+        <h2>Game Over!</h2>
+        <h3 v-if="winner==='monster'">You lost!</h3>
+        <h3 v-else-if="winner==='player'">You won!</h3>
+        <h3 v-else>It's a draw!</h3>
+        <button @click="restartGame">Start New Game</button>
+      </section>
+      <section id="controls" v-else>
+        <button @click="attackMonster">ATTACK</button>
+        <button
+          @click="specialAttackMonster"
+          :disabled="!availableSpecialAttack"
+        >
+          SPECIAL ATTACK
+        </button>
+        <button @click="healPlayer">HEAL</button>
+        <button @click="surrender">SURRENDER</button>
       </section>
       <section id="log" class="container">
         <h2>Battle Log</h2>
-        <ul></ul>
+        <ul>
+          <li v-for="{actionBy, actionType, actionValue} in logMessages">
+            <span
+              :class="{'log--player': actionBy === 'player', 'log--monster': actionBy === 'monster'}"
+              >{{actionBy[0].toUpperCase() + actionBy.slice(1)}}</span
+            >
+            <span v-if="actionType === 'heal'">
+              heals himself for <span class="log--heal">{{actionValue}}</span>
+            </span>
+            <span v-else>
+              attacks and deals <span class="log--damage">{{actionValue}}</span>
+            </span>
+          </li>
+        </ul>
       </section>
     </div>
   </body>
